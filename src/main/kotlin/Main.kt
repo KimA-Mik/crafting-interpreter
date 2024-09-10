@@ -27,6 +27,8 @@ fun main(args: Array<String>) {
             '.' -> println("DOT . null")
             ',' -> println("COMMA , null")
             '+' -> println("PLUS + null")
+            '-' -> println("MINUS - null")
+            ';' -> println("SEMICOLON ; null")
             else -> continue
         }
     }
