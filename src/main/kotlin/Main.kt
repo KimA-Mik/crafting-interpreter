@@ -17,9 +17,12 @@ fun main(args: Array<String>) {
 
     val fileContents = File(filename).readText()
 
-     if (fileContents.isNotEmpty()) {
-         throw NotImplementedError("Scanner not implemented")
-     } else {
-         println("EOF  null") // Placeholder, remove this line when implementing the scanner
-     }
+    for (c in fileContents) {
+        when (c) {
+            '(' -> println("LEFT_PAREN ( null")
+            ')' -> println("RIGHT_PAREN ) null")
+        }
+    }
+
+    println("EOF  null")
 }
