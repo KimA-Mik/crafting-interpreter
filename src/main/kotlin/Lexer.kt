@@ -27,8 +27,8 @@ class Lexer(val text: String) {
                 reportUnexpectedCharacter(c, line)
             } else {
                 tokens.add(Token(type = type, string = text.substring(pastTokenPosition, position)))
-                pastTokenPosition = position
             }
+            pastTokenPosition = position
         }
         tokens.add(Token(type = TokenType.EOF, string = String()))
         return tokens
