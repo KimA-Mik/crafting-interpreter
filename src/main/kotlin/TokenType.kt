@@ -9,6 +9,8 @@ enum class TokenType {
     PLUS,
     MINUS,
     SEMICOLON,
+    EQUAL,
+    EQUAL_EQUAL,
 
     EOF
 }
