@@ -15,23 +15,53 @@ fun main(args: Array<String>) {
         exitProcess(1)
     }
 
+    var lexicalErrors = false
+    val tokens = mutableListOf<Token>()
+
     val fileContents = File(filename).readText()
 
+    var line = 1
     for (c in fileContents) {
-        when (c) {
-            '(' -> println("LEFT_PAREN ( null")
-            ')' -> println("RIGHT_PAREN ) null")
-            '{' -> println("LEFT_BRACE { null")
-            '}' -> println("RIGHT_BRACE } null")
-            '*' -> println("STAR * null")
-            '.' -> println("DOT . null")
-            ',' -> println("COMMA , null")
-            '+' -> println("PLUS + null")
-            '-' -> println("MINUS - null")
-            ';' -> println("SEMICOLON ; null")
-            else -> continue
+        if (c == '\n') {
+            line += 1
+            continue
+        }
+
+        val type = getTokenType(c)
+        if (type == null) {
+            lexicalErrors = true
+            reportUnexpectedCharacter(c, line)
+        } else {
+            tokens.add(Token(type = type, string = c.toString()))
         }
     }
+    tokens.add(Token(type = TokenType.EOF, string = String()))
 
-    println("EOF  null")
+    tokens.forEach {
+        println(it)
+    }
+
+    if (lexicalErrors) {
+        exitProcess(65)
+    }
+}
+
+fun getTokenType(c: Char): TokenType? {
+    return when (c) {
+        '(' -> TokenType.LEFT_PAREN
+        ')' -> TokenType.RIGHT_PAREN
+        '{' -> TokenType.LEFT_BRACE
+        '}' -> TokenType.RIGHT_BRACE
+        '*' -> TokenType.STAR
+        '.' -> TokenType.DOT
+        ',' -> TokenType.COMMA
+        '+' -> TokenType.PLUS
+        '-' -> TokenType.MINUS
+        ';' -> TokenType.SEMICOLON
+        else -> null
+    }
+}
+
+fun reportUnexpectedCharacter(character: Char, line: Int) {
+    System.err.println("[line $line] Error: Unexpected character: $character")
 }
