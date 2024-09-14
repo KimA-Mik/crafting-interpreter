@@ -11,6 +11,8 @@ enum class TokenType {
     SEMICOLON,
     EQUAL,
     EQUAL_EQUAL,
+    BANG,
+    BANG_EQUAL,
 
     EOF
 }

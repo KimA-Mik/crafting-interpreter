@@ -51,6 +51,7 @@ class Lexer(val text: String) {
             '-' -> TokenType.MINUS
             ';' -> TokenType.SEMICOLON
             '=' -> parseEquals()
+            '!' -> parseBang()
             else -> null
         }
         position += 1
@@ -64,6 +65,16 @@ class Lexer(val text: String) {
         } else {
             position += 1
             TokenType.EQUAL_EQUAL
+        }
+    }
+
+    private fun parseBang(): TokenType {
+        val next = position + 1
+        return if (next == text.length || text[next] != '=') {
+            TokenType.BANG
+        } else {
+            position += 1
+            TokenType.BANG_EQUAL
         }
     }
 
