@@ -1,18 +1,13 @@
 enum class TokenType {
-    LEFT_PAREN,
-    RIGHT_PAREN,
-    LEFT_BRACE,
-    RIGHT_BRACE,
-    STAR,
-    DOT,
-    COMMA,
-    PLUS,
-    MINUS,
+    LEFT_PAREN, RIGHT_PAREN,
+    LEFT_BRACE, RIGHT_BRACE,
+    DOT, COMMA,
+    STAR, PLUS, MINUS,
     SEMICOLON,
-    EQUAL,
-    EQUAL_EQUAL,
-    BANG,
-    BANG_EQUAL,
+    EQUAL, EQUAL_EQUAL,
+    BANG, BANG_EQUAL,
+    LESS, LESS_EQUAL,
+    GREATER, GREATER_EQUAL,
 
     EOF
 }

@@ -52,6 +52,8 @@ class Lexer(val text: String) {
             ';' -> TokenType.SEMICOLON
             '=' -> parseEquals()
             '!' -> parseBang()
+            '<' -> parseLess()
+            '>' -> parseGreater()
             else -> null
         }
         position += 1
@@ -60,25 +62,55 @@ class Lexer(val text: String) {
 
     private fun parseEquals(): TokenType {
         val next = position + 1
-        return if (next == text.length || text[next] != '=') {
-            TokenType.EQUAL
-        } else {
+
+        return if (expectChat(next, EQUALS)) {
             position += 1
             TokenType.EQUAL_EQUAL
+        } else {
+            TokenType.EQUAL
         }
     }
 
     private fun parseBang(): TokenType {
         val next = position + 1
-        return if (next == text.length || text[next] != '=') {
-            TokenType.BANG
-        } else {
+
+        return if (expectChat(next, EQUALS)) {
             position += 1
             TokenType.BANG_EQUAL
+        } else {
+            TokenType.BANG
         }
+    }
+
+    private fun parseLess(): TokenType {
+        val next = position + 1
+        return if (expectChat(next, EQUALS)) {
+            position += 1
+            TokenType.LESS_EQUAL
+        } else {
+            TokenType.LESS
+        }
+    }
+
+    private fun parseGreater(): TokenType {
+        val next = position + 1
+        return if (expectChat(next, EQUALS)) {
+            position += 1
+            TokenType.GREATER_EQUAL
+        } else {
+            TokenType.GREATER
+        }
+    }
+
+    private fun expectChat(pos: Int, c: Char): Boolean {
+        return pos < text.length && text[pos] == c
     }
 
     private fun reportUnexpectedCharacter(character: Char, line: Int) {
         System.err.println("[line $line] Error: Unexpected character: $character")
+    }
+
+    companion object {
+        private const val EQUALS = '='
     }
 }
