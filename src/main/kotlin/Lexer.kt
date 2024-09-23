@@ -50,6 +50,9 @@ class Lexer(val text: String) {
                 if (c.isDigit()) {
                     return parseNumber()
                 }
+                if (c.isIdentifierStart()) {
+                    return parseIdentifier()
+                }
 
                 position += 1
                 lexicalError = true
@@ -63,6 +66,16 @@ class Lexer(val text: String) {
         }
 
         return token
+    }
+
+    private fun parseIdentifier(): Token {
+        val start = position
+        skipWhile { it.isIdentifier() }
+
+        return Token(
+            type = TokenType.IDENTIFIER,
+            lexeme = text.substring(start, position),
+        )
     }
 
     private fun parseNumber(): Token {
