@@ -47,8 +47,8 @@ class Lexer(val text: String) {
             GREATER -> parseGreater()
             DOUBLE_QUOTES -> parseStringLiteral()
             else -> {
-                lexicalError = true
                 position += 1
+                lexicalError = true
                 reportUnexpectedCharacter(c, line)
                 getNextToken(false)
             }
@@ -67,11 +67,11 @@ class Lexer(val text: String) {
         skipWhile { it != DOUBLE_QUOTES }
 
         if (!hasNext()) {
+            lexicalError = true
             reportUnterminatedString()
             return getNextToken(false)
         }
 
-//        position += 1
         return Token(
             type = TokenType.STRING,
             lexeme = text.substring(start, position + 1),
@@ -147,7 +147,7 @@ class Lexer(val text: String) {
     }
 
     private fun reportUnterminatedString() {
-        println("[line $line] Error: Unterminated string.")
+        System.err.println("[line $line] Error: Unterminated string.")
     }
 
     companion object {
