@@ -8,6 +8,7 @@ class Lexer(val text: String) {
     fun resetState() {
         lexicalError = false
         position = 0
+        line = 1
     }
 
     fun tokenise(): List<Token> {
@@ -51,7 +52,7 @@ class Lexer(val text: String) {
                 fine = false
                 position += 1
                 reportUnexpectedCharacter(c, line)
-                getNextToken()
+                null
             }
         }
 
@@ -68,7 +69,7 @@ class Lexer(val text: String) {
         val next = position + 1
         if (expectChar(next, SLASH)) {
             skipWhile { it != '\n' }
-            return getNextToken()
+            return null
         } else {
             return Tokens.DEFAULT_SLASH
         }
