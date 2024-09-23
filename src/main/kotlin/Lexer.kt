@@ -1,5 +1,7 @@
 class Lexer(val text: String) {
     private var position = 0
+    private var line = 1
+
     var lexicalError = false
         private set
 
@@ -12,97 +14,110 @@ class Lexer(val text: String) {
         resetState()
         val tokens = mutableListOf<Token>()
 
-        var pastTokenPosition = 0
-        var line = 1
-        while (hasNext()) {
-            val c = currentChar()
-            if (c == '\n') {
-                line += 1
-                continue
+        var token: Token? = null
+        while (token?.type != TokenType.EOF) {
+            token = getNextToken()
+            token?.let {
+                tokens.add(token)
             }
-
-            val type = getNextTokenType()
-            if (type == null) {
-                lexicalError = true
-                reportUnexpectedCharacter(c, line)
-            } else {
-                tokens.add(Token(type = type, string = text.substring(pastTokenPosition, position)))
-            }
-            pastTokenPosition = position
         }
-        tokens.add(Token(type = TokenType.EOF, string = String()))
         return tokens
     }
 
     private fun hasNext() = position < text.length
     private fun currentChar() = text[position]
 
-    private fun getNextTokenType(): TokenType? {
-        val c = text[position]
-        val t = when (c) {
-            '(' -> TokenType.LEFT_PAREN
-            ')' -> TokenType.RIGHT_PAREN
-            '{' -> TokenType.LEFT_BRACE
-            '}' -> TokenType.RIGHT_BRACE
-            '*' -> TokenType.STAR
-            '.' -> TokenType.DOT
-            ',' -> TokenType.COMMA
-            '+' -> TokenType.PLUS
-            '-' -> TokenType.MINUS
-            ';' -> TokenType.SEMICOLON
-            '=' -> parseEquals()
-            '!' -> parseBang()
-            '<' -> parseLess()
-            '>' -> parseGreater()
-            else -> null
+    private fun getNextToken(): Token? {
+        skipWhile { it.isWhitespace() }
+        if (!hasNext()) return Tokens.DEFAULT_EOF
+
+        val t = when (val c = currentChar()) {
+            LEFT_PAREN -> Tokens.DEFAULT_LEFT_PAREN
+            RIGHT_PAREN -> Tokens.DEFAULT_RIGHT_PAREN
+            LEFT_BRACE -> Tokens.DEFAULT_LEFT_BRACE
+            RIGHT_BRACE -> Tokens.DEFAULT_RIGHT_BRACE
+            DOT -> Tokens.DEFAULT_DOT
+            COMMA -> Tokens.DEFAULT_COMMA
+            STAR -> Tokens.DEFAULT_STAR
+            SLASH -> parseSlash()
+            PLUS -> Tokens.DEFAULT_PLUS
+            MINUS -> Tokens.DEFAULT_MINUS
+            SEMICOLON -> Tokens.DEFAULT_SEMICOLON
+            EQUAL -> parseEquals()
+            BANG -> parseBang()
+            LESS -> parseLess()
+            GREATER -> parseGreater()
+            else -> {
+                lexicalError = true
+                reportUnexpectedCharacter(c, line)
+                position += 1
+                getNextToken()
+            }
         }
         position += 1
         return t
     }
 
-    private fun parseEquals(): TokenType {
+    private fun parseSlash(): Token? {
         val next = position + 1
-
-        return if (expectChat(next, EQUALS)) {
-            position += 1
-            TokenType.EQUAL_EQUAL
+        if (expectChar(next, SLASH)) {
+            skipWhile { it != '\n' }
+            return getNextToken()
         } else {
-            TokenType.EQUAL
+            return Tokens.DEFAULT_SLASH
         }
     }
 
-    private fun parseBang(): TokenType {
+    private fun parseEquals(): Token {
         val next = position + 1
 
-        return if (expectChat(next, EQUALS)) {
+        return if (expectChar(next, EQUAL)) {
             position += 1
-            TokenType.BANG_EQUAL
+            Tokens.DEFAULT_EQUAL_EQUAL
         } else {
-            TokenType.BANG
+            Tokens.DEFAULT_EQUAL
         }
     }
 
-    private fun parseLess(): TokenType {
+    private fun parseBang(): Token {
         val next = position + 1
-        return if (expectChat(next, EQUALS)) {
+
+        return if (expectChar(next, EQUAL)) {
             position += 1
-            TokenType.LESS_EQUAL
+            Tokens.DEFAULT_BANG_EQUAL
         } else {
-            TokenType.LESS
+            Tokens.DEFAULT_BANG
         }
     }
 
-    private fun parseGreater(): TokenType {
+    private fun parseLess(): Token {
         val next = position + 1
-        return if (expectChat(next, EQUALS)) {
+        return if (expectChar(next, EQUAL)) {
             position += 1
-            TokenType.GREATER_EQUAL
+            Tokens.DEFAULT_LESS_EQUAL
         } else {
-            TokenType.GREATER
+            Tokens.DEFAULT_LESS
         }
     }
 
-    private fun expectChat(pos: Int, c: Char): Boolean {
+    private fun parseGreater(): Token {
+        val next = position + 1
+        return if (expectChar(next, EQUAL)) {
+            position += 1
+            Tokens.DEFAULT_GREATER_EQUAL
+        } else {
+            Tokens.DEFAULT_GREATER
+        }
+    }
+
+    private fun skipWhile(condition: (Char) -> Boolean) {
+        while (hasNext() && condition(currentChar())) {
+            if (currentChar() == '\n') line += 1
+            position += 1
+        }
+    }
+
+    private fun expectChar(pos: Int, c: Char): Boolean {
         return pos < text.length && text[pos] == c
     }
 
@@ -111,6 +126,44 @@ class Lexer(val text: String) {
     }
 
     companion object {
-        private const val EQUALS = '='
+        private const val LEFT_PAREN = '('
+        private const val RIGHT_PAREN = ')'
+        private const val LEFT_BRACE = '{'
+        private const val RIGHT_BRACE = '}'
+        private const val DOT = '.'
+        private const val COMMA = ','
+        private const val STAR = '*'
+        private const val EQUAL = '='
+        private const val SLASH = '/'
+        private const val PLUS = '+'
+        private const val MINUS = '-'
+        private const val SEMICOLON = ';'
+        private const val BANG = '!'
+        private const val LESS = '<'
+        private const val GREATER = '>'
+    }
+
+    private object Tokens {
+        val DEFAULT_LEFT_PAREN = Token(type = TokenType.LEFT_PAREN, string = LEFT_PAREN.toString())
+        val DEFAULT_RIGHT_PAREN = Token(type = TokenType.RIGHT_PAREN, string = RIGHT_PAREN.toString())
+        val DEFAULT_LEFT_BRACE = Token(type = TokenType.LEFT_BRACE, string = LEFT_BRACE.toString())
+        val DEFAULT_RIGHT_BRACE = Token(type = TokenType.RIGHT_BRACE, string = RIGHT_BRACE.toString())
+        val DEFAULT_DOT = Token(type = TokenType.DOT, string = DOT.toString())
+        val DEFAULT_COMMA = Token(type = TokenType.COMMA, string = COMMA.toString())
+        val DEFAULT_STAR = Token(type = TokenType.STAR, string = STAR.toString())
+        val DEFAULT_EQUAL = Token(type = TokenType.EQUAL, string = EQUAL.toString())
+        val DEFAULT_EQUAL_EQUAL = Token(type = TokenType.EQUAL_EQUAL, string = "$EQUAL$EQUAL")
+        val DEFAULT_SLASH = Token(type = TokenType.SLASH, string = SLASH.toString())
+        val DEFAULT_PLUS = Token(type = TokenType.PLUS, string = PLUS.toString())
+        val DEFAULT_MINUS = Token(type = TokenType.MINUS, string = MINUS.toString())
+        val DEFAULT_SEMICOLON = Token(type = TokenType.SEMICOLON, string = SEMICOLON.toString())
+        val DEFAULT_BANG = Token(type = TokenType.BANG, string = BANG.toString())
+        val DEFAULT_BANG_EQUAL = Token(type = TokenType.BANG_EQUAL, string = "$BANG$EQUAL")
+        val DEFAULT_LESS = Token(type = TokenType.LESS, string = LESS.toString())
+        val DEFAULT_LESS_EQUAL = Token(type = TokenType.LESS_EQUAL, string = "$LESS$EQUAL")
+        val DEFAULT_GREATER = Token(type = TokenType.GREATER, string = GREATER.toString())
+        val DEFAULT_GREATER_EQUAL = Token(type = TokenType.GREATER_EQUAL, string = "$GREATER$EQUAL")
+
+        val DEFAULT_EOF = Token(type = TokenType.EOF, string = String())
     }
 }
