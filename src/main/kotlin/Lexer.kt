@@ -47,6 +47,10 @@ class Lexer(val text: String) {
             GREATER -> parseGreater()
             DOUBLE_QUOTES -> parseStringLiteral()
             else -> {
+                if (c.isDigit()) {
+                    return parseNumber()
+                }
+
                 position += 1
                 lexicalError = true
                 reportUnexpectedCharacter(c, line)
@@ -59,6 +63,23 @@ class Lexer(val text: String) {
         }
 
         return token
+    }
+
+    private fun parseNumber(): Token {
+        val start = position
+        skipWhile { it.isDigit() }
+        if (hasNext() && currentChar() == DOT) {
+            position += 1
+            skipWhile { it.isDigit() }
+        }
+
+        val lexeme = text.substring(start, position)
+
+        return Token(
+            type = TokenType.NUMBER,
+            lexeme = lexeme,
+            literal = lexeme.toDoubleOrNull()?.toString()
+        )
     }
 
     private fun parseStringLiteral(): Token {
