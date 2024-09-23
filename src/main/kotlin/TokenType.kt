@@ -9,5 +9,7 @@ enum class TokenType {
     LESS, LESS_EQUAL,
     GREATER, GREATER_EQUAL,
 
+    STRING,
+
     EOF
 }

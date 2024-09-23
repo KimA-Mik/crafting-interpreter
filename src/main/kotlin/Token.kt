@@ -1,9 +1,9 @@
 data class Token(
     val type: TokenType,
-    val string: String,
-    val data: Any? = null,
+    val lexeme: String,
+    val literal: String? = null,
 ) {
     override fun toString(): String {
-        return "$type $string $data"
+        return "$type $lexeme $literal"
     }
 }
