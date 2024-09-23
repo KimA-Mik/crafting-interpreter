@@ -28,10 +28,9 @@ class Lexer(val text: String) {
     private fun hasNext() = position < text.length
     private fun currentChar() = text[position]
 
-    private fun getNextToken(): Token? {
+    private fun getNextToken(advance: Boolean = true): Token? {
         skipWhile { it.isWhitespace() }
         if (!hasNext()) return Tokens.DEFAULT_EOF
-        var fine = true
         val token = when (val c = currentChar()) {
             LEFT_PAREN -> Tokens.DEFAULT_LEFT_PAREN
             RIGHT_PAREN -> Tokens.DEFAULT_RIGHT_PAREN
@@ -49,17 +48,15 @@ class Lexer(val text: String) {
             LESS -> parseLess()
             GREATER -> parseGreater()
             else -> {
-                fine = false
+                lexicalError = true
                 position += 1
                 reportUnexpectedCharacter(c, line)
-                null
+                getNextToken(false)
             }
         }
 
-        if (fine) {
+        if (advance) {
             position += 1
-        } else {
-            lexicalError = true
         }
 
         return token
@@ -69,7 +66,7 @@ class Lexer(val text: String) {
         val next = position + 1
         if (expectChar(next, SLASH)) {
             skipWhile { it != '\n' }
-            return null
+            return getNextToken(false)
         } else {
             return Tokens.DEFAULT_SLASH
         }
