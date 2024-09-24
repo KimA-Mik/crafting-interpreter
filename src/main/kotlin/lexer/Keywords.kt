@@ -1,3 +1,5 @@
+package lexer
+
 object Keywords {
     const val AND = "and"
     const val CLASS = "class"

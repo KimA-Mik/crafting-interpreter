@@ -1,3 +1,5 @@
+package lexer
+
 class Lexer(val text: String) {
     private var position = 0
     private var line = 1

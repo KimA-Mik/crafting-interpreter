@@ -1,3 +1,5 @@
+package lexer
+
 object Symbols {
     const val LEFT_PAREN = '('
     const val RIGHT_PAREN = ')'

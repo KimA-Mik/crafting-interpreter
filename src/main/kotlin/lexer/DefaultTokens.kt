@@ -1,3 +1,5 @@
+package lexer
+
 object DefaultTokens {
     val LEFT_PAREN = Token(type = TokenType.LEFT_PAREN, lexeme = Symbols.LEFT_PAREN.toString())
     val RIGHT_PAREN = Token(type = TokenType.RIGHT_PAREN, lexeme = Symbols.RIGHT_PAREN.toString())

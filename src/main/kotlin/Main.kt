@@ -1,3 +1,5 @@
+import lexer.Lexer
+import parser.Parser
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -37,16 +39,12 @@ private fun parse(filename: String) {
 
     val lexer = Lexer(fileContents)
     val tokens = lexer.tokenise()
+    val parser = Parser(tokens)
 
-    tokens.forEach {
-        when (it.type) {
-            TokenType.FALSE -> println(it.lexeme)
-            TokenType.NIL -> println(it.lexeme)
-            TokenType.TRUE -> println(it.lexeme)
-            TokenType.NUMBER -> println(it.literal)
-            TokenType.STRING -> println(it.literal)
-            else -> {}
-        }
+    val expressions = parser.parse()
+
+    expressions.forEach {
+        println(it)
     }
 
     if (lexer.lexicalError) {
