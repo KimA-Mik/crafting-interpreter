@@ -44,6 +44,7 @@ private fun parse(filename: String) {
             TokenType.NIL -> println(it.lexeme)
             TokenType.TRUE -> println(it.lexeme)
             TokenType.NUMBER -> println(it.literal)
+            TokenType.STRING -> println(it.literal)
             else -> {}
         }
     }
