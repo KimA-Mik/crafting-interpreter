@@ -72,9 +72,21 @@ class Parser(private val tokens: List<Token>) {
     private fun parseUnary(token: Token): Expression? {
         val operator = UnaryOperator.fromToken(token.type) ?: return null
         val next = getNextExpression() ?: return null
-        if (next is Expression.Literal.TrueLiteral || next is Expression.Literal.FalseLiteral) {
-            return Expression.Unary(operator, next)
+
+        when (operator) {
+            UnaryOperator.BANG -> {
+                if (next is Expression.Literal.TrueLiteral || next is Expression.Literal.FalseLiteral) {
+                    return Expression.Unary(operator, next)
+                }
+            }
+
+            UnaryOperator.MINUS -> {
+                if (next is Expression.Literal.NumberLiteral) {
+                    return Expression.Unary(operator, next)
+                }
+            }
         }
+
         return null
     }
 }
