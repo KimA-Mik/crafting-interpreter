@@ -34,6 +34,8 @@ class Parser(private val tokens: List<Token>) {
             TokenType.STRING -> parseStringLiteral(token)
             TokenType.LEFT_PAREN -> parseGroup()
             TokenType.RIGHT_PAREN -> null
+            TokenType.MINUS -> parseUnary(token)
+            TokenType.BANG -> parseUnary(token)
             else -> {
                 null
             }
@@ -65,5 +67,14 @@ class Parser(private val tokens: List<Token>) {
         }
 
         return Expression.Grouping(group)
+    }
+
+    private fun parseUnary(token: Token): Expression? {
+        val operator = UnaryOperator.fromToken(token.type) ?: return null
+        val next = getNextExpression() ?: return null
+        if (next is Expression.Literal.TrueLiteral || next is Expression.Literal.FalseLiteral) {
+            return Expression.Unary(operator, next)
+        }
+        return null
     }
 }

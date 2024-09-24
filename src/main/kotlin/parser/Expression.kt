@@ -23,8 +23,11 @@ sealed interface Expression {
         }
     }
 
-    data class Unary(val operator: Operator, val expression: Expression) : Expression
-    data class Binary(val left: Expression, val operator: Operator, val right: Expression) : Expression
+    data class Unary(val unaryOperator: UnaryOperator, val expression: Expression) : Expression {
+        override fun toString(): String = "($unaryOperator $expression)"
+    }
+
+    data class Binary(val left: Expression, val operator: BinaryOperator, val right: Expression) : Expression
     data class Grouping(val expressions: List<Expression>) : Expression {
         override fun toString(): String {
             val sb = StringBuilder()
