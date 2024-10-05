@@ -16,8 +16,8 @@ class Interpreter {
         return when (expression) {
             Expression.Literal.FalseLiteral -> false
             Expression.Literal.NilLiteral -> null
-            is Expression.Literal.NumberLiteral -> TODO()
-            is Expression.Literal.StringLiteral -> TODO()
+            is Expression.Literal.NumberLiteral -> expression.value
+            is Expression.Literal.StringLiteral -> expression.value
             Expression.Literal.TrueLiteral -> true
         }
 

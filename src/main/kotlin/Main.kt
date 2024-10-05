@@ -38,11 +38,10 @@ fun evaluate(filename: String) {
     }
 
     val interpreter = Interpreter()
-    val res = interpreter.evaluate(expression)
-    if (res == null) {
-        println("nil")
-    } else {
-        println(res)
+    when (val res = interpreter.evaluate(expression)) {
+        null -> println("nil")
+        is Double -> println("%.2f".format(res).trimEnd('0').trimEnd('.').trimEnd(','))
+        else -> println(res)
     }
 }
 
