@@ -58,8 +58,16 @@ class Interpreter {
         val left = evaluateExpression(expression.left)
         val right = evaluateExpression(expression.right)
         return when (expression.operator) {
-            BinaryOperator.STAR -> (left as Double) * (right as Double)
-            BinaryOperator.SLASH -> (left as Double) / (right as Double)
+            BinaryOperator.STAR -> {
+                checkNumberOperands(expression.operator, left, right)
+                (left as Double) * (right as Double)
+            }
+
+            BinaryOperator.SLASH -> {
+                checkNumberOperands(expression.operator, left, right)
+                (left as Double) / (right as Double)
+            }
+
             BinaryOperator.MINUS -> (left as Double) - (right as Double)
             BinaryOperator.PLUS -> {
                 if (left is Double && right is Double)
@@ -96,5 +104,11 @@ class Interpreter {
         if (right is Double) return
         evaluationError = true
         throw RuntimeError(unaryOperator, "Operand must be a number.")
+    }
+
+    private fun checkNumberOperands(unaryOperator: BinaryOperator, left: Any?, right: Any?) {
+        if (left is Double && right is Double) return
+        evaluationError = true
+        throw RuntimeError(unaryOperator, "Operands must be numbers.")
     }
 }
