@@ -43,7 +43,7 @@ private fun parse(filename: String) {
 
     val expression = parser.parse()
     expression?.let {
-        println()
+        println(it)
     }
 
     if (lexer.lexicalError || parser.parserError) {
