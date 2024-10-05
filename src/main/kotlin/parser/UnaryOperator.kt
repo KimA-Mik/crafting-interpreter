@@ -1,6 +1,6 @@
 package parser
 
-import lexer.DefaultTokens
+import lexer.Symbols
 import lexer.TokenType
 
 enum class UnaryOperator {
@@ -8,8 +8,8 @@ enum class UnaryOperator {
 
     override fun toString(): String {
         return when (this) {
-            BANG -> DefaultTokens.BANG.lexeme
-            MINUS -> DefaultTokens.MINUS.lexeme
+            BANG -> Symbols.BANG.toString()
+            MINUS -> Symbols.MINUS.toString()
         }
     }
 

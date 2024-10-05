@@ -17,4 +17,9 @@ object Symbols {
     const val LESS = '<'
     const val GREATER = '>'
     const val DOUBLE_QUOTES = '"'
+
+    const val EQUAL_EQUAL = "=="
+    const val BANG_EQUAL = "!="
+    const val LESS_EQUAL = "<="
+    const val GREATER_EQUAL = ">="
 }

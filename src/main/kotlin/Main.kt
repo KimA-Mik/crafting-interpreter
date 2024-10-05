@@ -41,13 +41,12 @@ private fun parse(filename: String) {
     val tokens = lexer.tokenise()
     val parser = Parser(tokens)
 
-    val expressions = parser.parse()
-
-    expressions.forEach {
-        println(it)
+    val expression = parser.parse()
+    expression?.let {
+        println()
     }
 
-    if (lexer.lexicalError) {
+    if (lexer.lexicalError || parser.parserError) {
         exitProcess(65)
     }
 }

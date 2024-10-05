@@ -30,19 +30,19 @@ class Lexer(val text: String) {
 
     private fun getNextToken(advance: Boolean = true): Token {
         skipWhile { it.isWhitespace() }
-        if (!hasNext()) return DefaultTokens.EOF
+        if (!hasNext()) return Token(TokenType.EOF, lexeme = String(), line = line)
         val token = when (val c = currentChar()) {
-            Symbols.LEFT_PAREN -> DefaultTokens.LEFT_PAREN
-            Symbols.RIGHT_PAREN -> DefaultTokens.RIGHT_PAREN
-            Symbols.LEFT_BRACE -> DefaultTokens.LEFT_BRACE
-            Symbols.RIGHT_BRACE -> DefaultTokens.RIGHT_BRACE
-            Symbols.DOT -> DefaultTokens.DOT
-            Symbols.COMMA -> DefaultTokens.COMMA
-            Symbols.STAR -> DefaultTokens.STAR
+            Symbols.LEFT_PAREN -> Token(TokenType.LEFT_PAREN, line = line, lexeme = Symbols.LEFT_PAREN.toString())
+            Symbols.RIGHT_PAREN -> Token(TokenType.RIGHT_PAREN, line = line, lexeme = Symbols.RIGHT_PAREN.toString())
+            Symbols.LEFT_BRACE -> Token(TokenType.LEFT_BRACE, line = line, lexeme = Symbols.LEFT_BRACE.toString())
+            Symbols.RIGHT_BRACE -> Token(TokenType.RIGHT_BRACE, line = line, lexeme = Symbols.RIGHT_BRACE.toString())
+            Symbols.DOT -> Token(TokenType.DOT, line = line, lexeme = Symbols.DOT.toString())
+            Symbols.COMMA -> Token(TokenType.COMMA, line = line, lexeme = Symbols.COMMA.toString())
+            Symbols.STAR -> Token(TokenType.STAR, line = line, lexeme = Symbols.STAR.toString())
             Symbols.SLASH -> parseSlash()
-            Symbols.PLUS -> DefaultTokens.PLUS
-            Symbols.MINUS -> DefaultTokens.MINUS
-            Symbols.SEMICOLON -> DefaultTokens.SEMICOLON
+            Symbols.PLUS -> Token(TokenType.PLUS, line = line, lexeme = Symbols.PLUS.toString())
+            Symbols.MINUS -> Token(TokenType.MINUS, line = line, lexeme = Symbols.MINUS.toString())
+            Symbols.SEMICOLON -> Token(TokenType.SEMICOLON, line = line, lexeme = Symbols.SEMICOLON.toString())
             Symbols.EQUAL -> parseEquals()
             Symbols.BANG -> parseBang()
             Symbols.LESS -> parseLess()
@@ -75,12 +75,13 @@ class Lexer(val text: String) {
         skipWhile { it.isIdentifier() }
 
         val lexeme = text.substring(start, position)
-        return KEYWORDS_TOKENS.getOrElse(lexeme) {
-            Token(
-                type = TokenType.IDENTIFIER,
-                lexeme = lexeme,
-            )
-        }
+        val type = KEYWORDS_TOKENS.getOrElse(lexeme) { TokenType.IDENTIFIER }
+
+        return Token(
+            type = type,
+            line = line,
+            lexeme = lexeme,
+        )
     }
 
     private fun parseNumber(): Token {
@@ -96,6 +97,7 @@ class Lexer(val text: String) {
         return Token(
             type = TokenType.NUMBER,
             lexeme = lexeme,
+            line = line,
             literal = lexeme.toDoubleOrNull()?.toString()
         )
     }
@@ -114,6 +116,7 @@ class Lexer(val text: String) {
         return Token(
             type = TokenType.STRING,
             lexeme = text.substring(start, position + 1),
+            line = line,
             literal = text.substring(start + 1, position),
         )
     }
@@ -124,7 +127,7 @@ class Lexer(val text: String) {
             skipWhile { it != '\n' }
             return getNextToken(false)
         } else {
-            return DefaultTokens.SLASH
+            return Token(TokenType.SLASH, line = line, lexeme = Symbols.SLASH.toString())
         }
     }
 
@@ -133,9 +136,9 @@ class Lexer(val text: String) {
 
         return if (expectChar(next, Symbols.EQUAL)) {
             position += 1
-            DefaultTokens.EQUAL_EQUAL
+            Token(TokenType.EQUAL_EQUAL, line = line, lexeme = Symbols.EQUAL_EQUAL)
         } else {
-            DefaultTokens.EQUAL
+            Token(TokenType.EQUAL, line = line, lexeme = Symbols.EQUAL.toString())
         }
     }
 
@@ -144,9 +147,9 @@ class Lexer(val text: String) {
 
         return if (expectChar(next, Symbols.EQUAL)) {
             position += 1
-            DefaultTokens.BANG_EQUAL
+            Token(TokenType.BANG_EQUAL, line = line, lexeme = Symbols.BANG_EQUAL)
         } else {
-            DefaultTokens.BANG
+            Token(TokenType.BANG, line = line, lexeme = Symbols.BANG.toString())
         }
     }
 
@@ -154,9 +157,9 @@ class Lexer(val text: String) {
         val next = position + 1
         return if (expectChar(next, Symbols.EQUAL)) {
             position += 1
-            DefaultTokens.LESS_EQUAL
+            Token(TokenType.LESS_EQUAL, line = line, lexeme = Symbols.LESS_EQUAL)
         } else {
-            DefaultTokens.LESS
+            Token(TokenType.LESS, line = line, lexeme = Symbols.LESS.toString())
         }
     }
 
@@ -164,9 +167,9 @@ class Lexer(val text: String) {
         val next = position + 1
         return if (expectChar(next, Symbols.EQUAL)) {
             position += 1
-            DefaultTokens.GREATER_EQUAL
+            Token(TokenType.GREATER_EQUAL, line = line, lexeme = Symbols.GREATER_EQUAL)
         } else {
-            DefaultTokens.GREATER
+            Token(TokenType.GREATER, line = line, lexeme = Symbols.GREATER.toString())
         }
     }
 
@@ -191,22 +194,22 @@ class Lexer(val text: String) {
 
     companion object {
         private val KEYWORDS_TOKENS = mapOf(
-            Keywords.AND to DefaultTokens.AND,
-            Keywords.CLASS to DefaultTokens.CLASS,
-            Keywords.ELSE to DefaultTokens.ELSE,
-            Keywords.FALSE to DefaultTokens.FALSE,
-            Keywords.FOR to DefaultTokens.FOR,
-            Keywords.FUN to DefaultTokens.FUN,
-            Keywords.IF to DefaultTokens.IF,
-            Keywords.NIL to DefaultTokens.NIL,
-            Keywords.OR to DefaultTokens.OR,
-            Keywords.PRINT to DefaultTokens.PRINT,
-            Keywords.RETURN to DefaultTokens.RETURN,
-            Keywords.SUPER to DefaultTokens.SUPER,
-            Keywords.THIS to DefaultTokens.THIS,
-            Keywords.TRUE to DefaultTokens.TRUE,
-            Keywords.VAR to DefaultTokens.VAR,
-            Keywords.WHILE to DefaultTokens.WHILE,
+            Keywords.AND to TokenType.AND,
+            Keywords.CLASS to TokenType.CLASS,
+            Keywords.ELSE to TokenType.ELSE,
+            Keywords.FALSE to TokenType.FALSE,
+            Keywords.FOR to TokenType.FOR,
+            Keywords.FUN to TokenType.FUN,
+            Keywords.IF to TokenType.IF,
+            Keywords.NIL to TokenType.NIL,
+            Keywords.OR to TokenType.OR,
+            Keywords.PRINT to TokenType.PRINT,
+            Keywords.RETURN to TokenType.RETURN,
+            Keywords.SUPER to TokenType.SUPER,
+            Keywords.THIS to TokenType.THIS,
+            Keywords.TRUE to TokenType.TRUE,
+            Keywords.VAR to TokenType.VAR,
+            Keywords.WHILE to TokenType.WHILE,
         )
     }
 }
