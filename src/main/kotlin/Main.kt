@@ -40,6 +40,9 @@ fun evaluate(filename: String) {
     val interpreter = Interpreter()
 
     val res = interpreter.evaluate(expression)
+    if (interpreter.evaluationError) {
+        exitProcess(65)
+    }
     println(res)
 }
 

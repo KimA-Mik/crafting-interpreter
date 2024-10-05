@@ -2,10 +2,23 @@ package interpreter
 
 import parser.BinaryOperator
 import parser.Expression
+import parser.Operator
 import parser.UnaryOperator
 
 class Interpreter {
-    fun evaluate(expression: Expression) = EvaluationResult(evaluateExpression(expression))
+    class RuntimeError(val operator: Operator, message: String) : Exception(message)
+
+    fun evaluate(expression: Expression): EvaluationResult? {
+        try {
+            return EvaluationResult(evaluateExpression(expression))
+        } catch (e: RuntimeError) {
+            System.err.println(e.message)
+        }
+        return null
+    }
+
+    var evaluationError = false
+        private set
 
     private fun evaluateExpression(expression: Expression): Any? {
         return when (expression) {
@@ -34,7 +47,10 @@ class Interpreter {
         val right = evaluateExpression(expression.expression)
         return when (expression.unaryOperator) {
             UnaryOperator.BANG -> !isTruthy(right)
-            UnaryOperator.MINUS -> -(right as Double)
+            UnaryOperator.MINUS -> {
+                checkNumberOperand(expression.unaryOperator, right)
+                -(right as Double)
+            }
         }
     }
 
@@ -74,5 +90,11 @@ class Interpreter {
         if (a == null) return false
 
         return a == b
+    }
+
+    private fun checkNumberOperand(unaryOperator: UnaryOperator, right: Any?) {
+        if (right is Double) return
+        evaluationError = true
+        throw RuntimeError(unaryOperator, "Operand must be a number.")
     }
 }
