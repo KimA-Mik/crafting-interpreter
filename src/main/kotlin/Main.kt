@@ -41,7 +41,7 @@ fun evaluate(filename: String) {
 
     val res = interpreter.evaluate(expression)
     if (interpreter.evaluationError) {
-        exitProcess(65)
+        exitProcess(70)
     }
     println(res)
 }
