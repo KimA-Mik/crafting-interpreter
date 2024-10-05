@@ -38,11 +38,9 @@ fun evaluate(filename: String) {
     }
 
     val interpreter = Interpreter()
-    when (val res = interpreter.evaluate(expression)) {
-        null -> println("nil")
-        is Double -> println("%.2f".format(res).trimEnd('0').trimEnd('.').trimEnd(','))
-        else -> println(res)
-    }
+
+    val res = interpreter.evaluate(expression)
+    println(res)
 }
 
 private fun tokenize(filename: String) {
