@@ -1,6 +1,7 @@
 package interpreter
 
 import parser.Expression
+import parser.UnaryOperator
 
 class Interpreter {
     fun evaluate(expression: Expression) = EvaluationResult(evaluateExpression(expression))
@@ -10,7 +11,7 @@ class Interpreter {
             is Expression.Binary -> TODO()
             is Expression.Grouping -> evaluateGroupingExpression(expression)
             is Expression.Literal -> evaluateLiteral(expression)
-            is Expression.Unary -> TODO()
+            is Expression.Unary -> evaluateUnaryExpression(expression)
         }
     }
 
@@ -24,7 +25,21 @@ class Interpreter {
         }
     }
 
-    private fun evaluateGroupingExpression(expression: Expression.Grouping): Any {
-        return evaluate(expression.expressions)
+    private fun evaluateGroupingExpression(expression: Expression.Grouping): Any? {
+        return evaluateExpression(expression.expressions)
+    }
+
+    private fun evaluateUnaryExpression(expression: Expression.Unary): Any {
+        val right = evaluateExpression(expression.expression)
+        return when (expression.unaryOperator) {
+            UnaryOperator.BANG -> !isTruthy(right)
+            UnaryOperator.MINUS -> -(right as Double)
+        }
+    }
+
+    private fun isTruthy(obj: Any?): Boolean {
+        if (obj == null) return false
+        if (obj is Boolean) return obj
+        return true
     }
 }
