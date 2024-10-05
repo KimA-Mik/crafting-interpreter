@@ -1,3 +1,4 @@
+import interpreter.Interpreter
 import lexer.Lexer
 import parser.Parser
 import java.io.File
@@ -15,7 +16,33 @@ fun main(args: Array<String>) {
     when (command) {
         "tokenize" -> tokenize(filename)
         "parse" -> parse(filename)
+        "evaluate" -> evaluate(filename)
         else -> unknownCommand(command)
+    }
+}
+
+fun evaluate(filename: String) {
+    val fileContents = File(filename).readText()
+
+    val lexer = Lexer(fileContents)
+    val tokens = lexer.tokenise()
+    if (lexer.lexicalError) {
+        exitProcess(65)
+    }
+    val parser = Parser(tokens)
+
+    val expression = parser.parse()
+
+    if (parser.parserError || expression == null) {
+        exitProcess(65)
+    }
+
+    val interpreter = Interpreter()
+    val res = interpreter.evaluate(expression)
+    if (res == null) {
+        println("nil")
+    } else {
+        println(res)
     }
 }
 
