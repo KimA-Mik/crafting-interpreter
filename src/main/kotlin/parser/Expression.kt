@@ -27,15 +27,12 @@ sealed interface Expression {
         override fun toString(): String = "($unaryOperator $expression)"
     }
 
-    data class Binary(val left: Expression, val operator: BinaryOperator, val right: Expression) : Expression
-    data class Grouping(val expressions: List<Expression>) : Expression {
-        override fun toString(): String {
-            val sb = StringBuilder()
-            expressions.forEachIndexed { index, it ->
-                if (index > 0) sb.append(' ')
-                sb.append(it)
-            }
-            return "(group $sb)"
-        }
+    data class Binary(val left: Expression, val operator: BinaryOperator, val right: Expression) : Expression {
+        override fun toString(): String = "($operator $left $right)"
+    }
+
+    data class Grouping(val expressions: Expression) : Expression {
+        override fun toString() = "(group $expressions)"
+
     }
 }
