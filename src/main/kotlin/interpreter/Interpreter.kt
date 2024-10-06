@@ -85,10 +85,25 @@ class Interpreter {
 
             BinaryOperator.EQUAL_EQUAL -> isEqual(left, right)
             BinaryOperator.BANG_EQUAL -> !isEqual(left, right)
-            BinaryOperator.LESS -> (left as Double) < (right as Double)
-            BinaryOperator.LESS_EQUAL -> (left as Double) <= (right as Double)
-            BinaryOperator.GREATER -> (left as Double) > (right as Double)
-            BinaryOperator.GREATER_EQUAL -> (left as Double) >= (right as Double)
+            BinaryOperator.LESS -> {
+                checkNumberOperands(expression.operator, left, right)
+                (left as Double) < (right as Double)
+            }
+
+            BinaryOperator.LESS_EQUAL -> {
+                checkNumberOperands(expression.operator, left, right)
+                (left as Double) <= (right as Double)
+            }
+
+            BinaryOperator.GREATER -> {
+                checkNumberOperands(expression.operator, left, right)
+                (left as Double) > (right as Double)
+            }
+
+            BinaryOperator.GREATER_EQUAL -> {
+                checkNumberOperands(expression.operator, left, right)
+                (left as Double) >= (right as Double)
+            }
         }
     }
 
