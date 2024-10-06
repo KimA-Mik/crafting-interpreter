@@ -90,14 +90,17 @@ private fun parse(filename: String) {
 
     val lexer = Lexer(fileContents)
     val tokens = lexer.tokenise()
+    if (lexer.lexicalError) {
+        exitProcess(65)
+    }
 
     val parser = Parser(tokens)
-    val expression = parser.parseStatements()
-    expression.let {
+    val expression = parser.parseExpression()
+    expression?.let {
         println(it)
     }
 
-    if (lexer.lexicalError || parser.parserError) {
+    if (parser.parserError) {
         exitProcess(65)
     }
 }
