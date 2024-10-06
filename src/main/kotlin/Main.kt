@@ -38,7 +38,7 @@ fun run(filename: String) {
     }
 
     val interpreter = Interpreter()
-    interpreter.interpretStatements(statements)
+    interpreter.execute(statements)
     if (interpreter.evaluationError) {
         exitProcess(70)
     }

@@ -1,5 +1,7 @@
 package parser
 
+import lexer.Token
+
 sealed interface Expression {
     sealed interface Literal : Expression {
         data class StringLiteral(val value: String) : Literal {
@@ -33,6 +35,7 @@ sealed interface Expression {
 
     data class Grouping(val expressions: Expression) : Expression {
         override fun toString() = "(group $expressions)"
-
     }
+
+    data class Variable(val name: Token) : Expression
 }

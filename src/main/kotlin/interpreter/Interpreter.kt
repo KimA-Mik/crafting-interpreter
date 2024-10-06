@@ -1,9 +1,14 @@
 package interpreter
 
-import parser.*
+import parser.BinaryOperator
+import parser.Declaration
+import parser.Expression
+import parser.UnaryOperator
 
 class Interpreter {
-    class RuntimeError(val operator: Operator, message: String) : Exception(message)
+    private val environment = Environment()
+
+    class RuntimeError(message: String) : Exception(message)
 
     fun interpretExpression(expression: Expression): EvaluationResult? {
         try {
@@ -14,28 +19,44 @@ class Interpreter {
         return null
     }
 
-    fun interpretStatements(statements: List<Statement>) {
+    fun execute(declarations: List<Declaration>) {
         try {
-            for (statement in statements) {
-                evaluateStatement(statement)
+            for (declaration in declarations) {
+                executeDeclaration(declaration)
             }
         } catch (e: RuntimeError) {
             System.err.println(e.message)
         }
     }
 
-    private fun evaluateStatement(statement: Statement) {
-        when (statement) {
-            is Statement.Expr -> evaluateExprStatement(statement)
-            is Statement.Print -> evaluatePrintStatement(statement)
+    private fun executeDeclaration(declaration: Declaration) {
+        when (declaration) {
+            is Declaration.Statement -> executeStatement(declaration)
+            is Declaration.Variable -> executeVariable(declaration)
         }
     }
 
-    private fun evaluateExprStatement(statement: Statement.Expr) {
+    private fun executeStatement(statement: Declaration.Statement) {
+        when (statement) {
+            is Declaration.Statement.Expr -> executeExprStatement(statement)
+            is Declaration.Statement.Print -> executePrintStatement(statement)
+        }
+    }
+
+    private fun executeVariable(variable: Declaration.Variable) {
+        var value: Any? = null
+        variable.initializer?.let {
+            value = evaluateExpression(it)
+        }
+
+        environment.define(variable.name.lexeme, value)
+    }
+
+    private fun executeExprStatement(statement: Declaration.Statement.Expr) {
         evaluateExpression(statement.expression)
     }
 
-    private fun evaluatePrintStatement(statement: Statement.Print) {
+    private fun executePrintStatement(statement: Declaration.Statement.Print) {
         val res = evaluateExpression(statement.expression)
         println(res.stringify())
     }
@@ -49,7 +70,12 @@ class Interpreter {
             is Expression.Grouping -> evaluateGroupingExpression(expression)
             is Expression.Literal -> evaluateLiteral(expression)
             is Expression.Unary -> evaluateUnaryExpression(expression)
+            is Expression.Variable -> evaluateVariable(expression)
         }
+    }
+
+    private fun evaluateVariable(variable: Expression.Variable): Any? {
+        return environment.get(variable.name)
     }
 
     private fun evaluateLiteral(expression: Expression.Literal): Any? {
@@ -146,17 +172,17 @@ class Interpreter {
     private fun checkNumberOperand(unaryOperator: UnaryOperator, right: Any?) {
         if (right is Double) return
         evaluationError = true
-        throw RuntimeError(unaryOperator, "Operand must be a number.")
+        throw RuntimeError("Operand must be a number.")
     }
 
     private fun checkNumberOperands(unaryOperator: BinaryOperator, left: Any?, right: Any?) {
         if (left is Double && right is Double) return
         evaluationError = true
-        throw RuntimeError(unaryOperator, "Operands must be numbers.")
+        throw RuntimeError("Operands must be numbers.")
     }
 
     private fun plusOperatorError() {
         evaluationError = true
-        throw RuntimeError(BinaryOperator.PLUS, "Operands must be two numbers or two strings.")
+        throw RuntimeError("Operands must be two numbers or two strings.")
     }
 }
