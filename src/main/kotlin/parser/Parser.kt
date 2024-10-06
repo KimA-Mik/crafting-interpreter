@@ -5,23 +5,39 @@ import lexer.TokenType
 
 
 class Parser(private val tokens: List<Token>) {
-    fun parse(): List<Statement> {
+    fun parseExpression(): Expression? {
+        try {
+            return expression()
+        } catch (e: ParserException) {
+            handleParserException(e)
+        } catch (e: Exception) {
+            System.err.println("Unknown exception ${e.message}")
+        }
+
+        return null
+    }
+
+    fun parseStatements(): List<Statement> {
         val statements = mutableListOf<Statement>()
         try {
             while (!isEnd()) {
                 statements.add(statement())
             }
         } catch (e: ParserException) {
-            val token = e.token
-            when (token.type) {
-                TokenType.EOF -> System.err.println("[line ${token.line}] at end ${e.message}")
-                else -> System.err.println("[line ${token.line}] at '${token.lexeme}': ${e.message}")
-            }
+            handleParserException(e)
         } catch (e: Exception) {
             System.err.println("Unknown exception ${e.message}")
         }
 
         return statements
+    }
+
+    private fun handleParserException(e: ParserException) {
+        val token = e.token
+        when (token.type) {
+            TokenType.EOF -> System.err.println("[line ${token.line}] at end ${e.message}")
+            else -> System.err.println("[line ${token.line}] at '${token.lexeme}': ${e.message}")
+        }
     }
 
     var parserError = false

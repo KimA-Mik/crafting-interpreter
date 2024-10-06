@@ -5,7 +5,16 @@ import parser.*
 class Interpreter {
     class RuntimeError(val operator: Operator, message: String) : Exception(message)
 
-    fun evaluate(statements: List<Statement>) {
+    fun interpretExpression(expression: Expression): EvaluationResult? {
+        try {
+            return EvaluationResult(evaluateExpression(expression))
+        } catch (e: RuntimeError) {
+            System.err.println(e.message)
+        }
+        return null
+    }
+
+    fun interpretStatements(statements: List<Statement>) {
         try {
             for (statement in statements) {
                 evaluateStatement(statement)

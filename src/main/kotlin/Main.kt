@@ -6,7 +6,7 @@ import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
     if (args.size < 2) {
-        System.err.println("Usage: ./your_program.sh tokenize <filename>")
+        System.err.println("Usage: ./your_program.sh [tokenize] [parse] [evaluate] [run]  <filename>")
         exitProcess(1)
     }
 
@@ -16,6 +16,7 @@ fun main(args: Array<String>) {
     when (command) {
         "tokenize" -> tokenize(filename)
         "parse" -> parse(filename)
+        "evaluate" -> evaluate(filename)
         "run" -> run(filename)
         else -> unknownCommand(command)
     }
@@ -29,28 +30,52 @@ fun run(filename: String) {
     if (lexer.lexicalError) {
         exitProcess(65)
     }
+
     val parser = Parser(tokens)
-
-    val statements = parser.parse()
-
+    val statements = parser.parseStatements()
     if (parser.parserError) {
         exitProcess(65)
     }
 
     val interpreter = Interpreter()
-
-    interpreter.evaluate(statements)
+    interpreter.interpretStatements(statements)
     if (interpreter.evaluationError) {
         exitProcess(70)
     }
 }
+
+fun evaluate(filename: String) {
+    val fileContents = File(filename).readText()
+
+    val lexer = Lexer(fileContents)
+    val tokens = lexer.tokenise()
+    if (lexer.lexicalError) {
+        exitProcess(65)
+    }
+
+    val parser = Parser(tokens)
+    val expression = parser.parseExpression()
+    if (parser.parserError || expression == null) {
+        exitProcess(65)
+    }
+
+    val interpreter = Interpreter()
+    val result = interpreter.interpretExpression(expression)
+    if (interpreter.evaluationError) {
+        exitProcess(70)
+    }
+
+    result?.let {
+        println(it)
+    }
+}
+
 
 private fun tokenize(filename: String) {
     val fileContents = File(filename).readText()
 
     val lexer = Lexer(fileContents)
     val tokens = lexer.tokenise()
-
     tokens.forEach {
         println(it)
     }
@@ -65,9 +90,9 @@ private fun parse(filename: String) {
 
     val lexer = Lexer(fileContents)
     val tokens = lexer.tokenise()
-    val parser = Parser(tokens)
 
-    val expression = parser.parse()
+    val parser = Parser(tokens)
+    val expression = parser.parseStatements()
     expression.let {
         println(it)
     }
