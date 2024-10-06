@@ -16,12 +16,12 @@ fun main(args: Array<String>) {
     when (command) {
         "tokenize" -> tokenize(filename)
         "parse" -> parse(filename)
-        "evaluate" -> evaluate(filename)
+        "run" -> run(filename)
         else -> unknownCommand(command)
     }
 }
 
-fun evaluate(filename: String) {
+fun run(filename: String) {
     val fileContents = File(filename).readText()
 
     val lexer = Lexer(fileContents)
