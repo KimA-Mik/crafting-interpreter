@@ -54,7 +54,7 @@ class Interpreter {
         }
     }
 
-    private fun evaluateBinaryExpression(expression: Expression.Binary): Any? {
+    private fun evaluateBinaryExpression(expression: Expression.Binary): Any {
         val left = evaluateExpression(expression.left)
         val right = evaluateExpression(expression.right)
         return when (expression.operator) {
@@ -68,14 +68,19 @@ class Interpreter {
                 (left as Double) / (right as Double)
             }
 
-            BinaryOperator.MINUS -> (left as Double) - (right as Double)
+            BinaryOperator.MINUS -> {
+                checkNumberOperands(expression.operator, left, right)
+                (left as Double) - (right as Double)
+            }
+
             BinaryOperator.PLUS -> {
-                if (left is Double && right is Double)
+                if (left is Double && right is Double) {
                     left + right
-                else if (left is String && right is String)
+                } else if (left is String && right is String) {
                     left + right
-                else
-                    null
+                } else {
+                    plusOperatorError()
+                }
             }
 
             BinaryOperator.EQUAL_EQUAL -> isEqual(left, right)
@@ -110,5 +115,10 @@ class Interpreter {
         if (left is Double && right is Double) return
         evaluationError = true
         throw RuntimeError(unaryOperator, "Operands must be numbers.")
+    }
+
+    private fun plusOperatorError() {
+        evaluationError = true
+        throw RuntimeError(BinaryOperator.PLUS, "Operands must be two numbers or two strings.")
     }
 }
