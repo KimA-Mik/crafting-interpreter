@@ -31,19 +31,18 @@ fun evaluate(filename: String) {
     }
     val parser = Parser(tokens)
 
-    val expression = parser.parse()
+    val statements = parser.parse()
 
-    if (parser.parserError || expression == null) {
+    if (parser.parserError) {
         exitProcess(65)
     }
 
     val interpreter = Interpreter()
 
-    val res = interpreter.evaluate(expression)
+    interpreter.evaluate(statements)
     if (interpreter.evaluationError) {
         exitProcess(70)
     }
-    println(res)
 }
 
 private fun tokenize(filename: String) {
@@ -69,7 +68,7 @@ private fun parse(filename: String) {
     val parser = Parser(tokens)
 
     val expression = parser.parse()
-    expression?.let {
+    expression.let {
         println(it)
     }
 

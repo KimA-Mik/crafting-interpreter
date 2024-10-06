@@ -1,20 +1,34 @@
 package interpreter
 
-import parser.BinaryOperator
-import parser.Expression
-import parser.Operator
-import parser.UnaryOperator
+import parser.*
 
 class Interpreter {
     class RuntimeError(val operator: Operator, message: String) : Exception(message)
 
-    fun evaluate(expression: Expression): EvaluationResult? {
+    fun evaluate(statements: List<Statement>) {
         try {
-            return EvaluationResult(evaluateExpression(expression))
+            for (statement in statements) {
+                evaluateStatement(statement)
+            }
         } catch (e: RuntimeError) {
             System.err.println(e.message)
         }
-        return null
+    }
+
+    private fun evaluateStatement(statement: Statement) {
+        when (statement) {
+            is Statement.Expr -> evaluateExprStatement(statement)
+            is Statement.Print -> evaluatePrintStatement(statement)
+        }
+    }
+
+    private fun evaluateExprStatement(statement: Statement.Expr) {
+        evaluateExpression(statement.expression)
+    }
+
+    private fun evaluatePrintStatement(statement: Statement.Print) {
+        val res = evaluateExpression(statement.expression)
+        println(res.stringify())
     }
 
     var evaluationError = false

@@ -5,9 +5,12 @@ import lexer.TokenType
 
 
 class Parser(private val tokens: List<Token>) {
-    fun parse(): Expression? {
+    fun parse(): List<Statement> {
+        val statements = mutableListOf<Statement>()
         try {
-            return expression()
+            while (!isEnd()) {
+                statements.add(statement())
+            }
         } catch (e: ParserException) {
             val token = e.token
             when (token.type) {
@@ -18,7 +21,7 @@ class Parser(private val tokens: List<Token>) {
             System.err.println("Unknown exception ${e.message}")
         }
 
-        return null
+        return statements
     }
 
     var parserError = false
@@ -142,5 +145,23 @@ class Parser(private val tokens: List<Token>) {
         }
 
         throw error(peek(), "Expect expression.")
+    }
+
+    private fun statement(): Statement {
+        if (match(TokenType.PRINT)) return printStatement()
+
+        return expressionStatement()
+    }
+
+    private fun printStatement(): Statement.Print {
+        val value = expression()
+        consume(TokenType.SEMICOLON, "Expect ';' after value.")
+        return Statement.Print(value)
+    }
+
+    private fun expressionStatement(): Statement.Expr {
+        val expression = expression()
+        consume(TokenType.SEMICOLON, "Expect ';' after expression.")
+        return Statement.Expr(expression)
     }
 }
