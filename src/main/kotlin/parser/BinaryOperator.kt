@@ -3,7 +3,7 @@ package parser
 import lexer.Symbols
 import lexer.TokenType
 
-enum class BinaryOperator : Operator {
+enum class BinaryOperator {
     STAR, SLASH, PLUS, MINUS,
     EQUAL_EQUAL, BANG_EQUAL,
     LESS, LESS_EQUAL,

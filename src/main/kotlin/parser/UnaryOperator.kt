@@ -3,7 +3,7 @@ package parser
 import lexer.Symbols
 import lexer.TokenType
 
-enum class UnaryOperator : Operator {
+enum class UnaryOperator {
     BANG, MINUS;
 
     override fun toString(): String {

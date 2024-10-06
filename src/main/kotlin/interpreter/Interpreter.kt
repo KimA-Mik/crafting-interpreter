@@ -7,6 +7,8 @@ import parser.UnaryOperator
 
 class Interpreter {
     private val environment = Environment()
+    var evaluationError = false
+        private set
 
     class RuntimeError(message: String) : Exception(message)
 
@@ -15,6 +17,7 @@ class Interpreter {
             return EvaluationResult(evaluateExpression(expression))
         } catch (e: RuntimeError) {
             System.err.println(e.message)
+            evaluationError = true
         }
         return null
     }
@@ -26,6 +29,7 @@ class Interpreter {
             }
         } catch (e: RuntimeError) {
             System.err.println(e.message)
+            evaluationError = true
         }
     }
 
@@ -61,9 +65,6 @@ class Interpreter {
         println(res.stringify())
     }
 
-    var evaluationError = false
-        private set
-
     private fun evaluateExpression(expression: Expression): Any? {
         return when (expression) {
             is Expression.Binary -> evaluateBinaryExpression(expression)
@@ -97,7 +98,7 @@ class Interpreter {
         return when (expression.unaryOperator) {
             UnaryOperator.BANG -> !isTruthy(right)
             UnaryOperator.MINUS -> {
-                checkNumberOperand(expression.unaryOperator, right)
+                checkNumberOperand(right)
                 -(right as Double)
             }
         }
@@ -108,17 +109,17 @@ class Interpreter {
         val right = evaluateExpression(expression.right)
         return when (expression.operator) {
             BinaryOperator.STAR -> {
-                checkNumberOperands(expression.operator, left, right)
+                checkNumberOperands(left, right)
                 (left as Double) * (right as Double)
             }
 
             BinaryOperator.SLASH -> {
-                checkNumberOperands(expression.operator, left, right)
+                checkNumberOperands(left, right)
                 (left as Double) / (right as Double)
             }
 
             BinaryOperator.MINUS -> {
-                checkNumberOperands(expression.operator, left, right)
+                checkNumberOperands(left, right)
                 (left as Double) - (right as Double)
             }
 
@@ -135,22 +136,22 @@ class Interpreter {
             BinaryOperator.EQUAL_EQUAL -> isEqual(left, right)
             BinaryOperator.BANG_EQUAL -> !isEqual(left, right)
             BinaryOperator.LESS -> {
-                checkNumberOperands(expression.operator, left, right)
+                checkNumberOperands(left, right)
                 (left as Double) < (right as Double)
             }
 
             BinaryOperator.LESS_EQUAL -> {
-                checkNumberOperands(expression.operator, left, right)
+                checkNumberOperands(left, right)
                 (left as Double) <= (right as Double)
             }
 
             BinaryOperator.GREATER -> {
-                checkNumberOperands(expression.operator, left, right)
+                checkNumberOperands(left, right)
                 (left as Double) > (right as Double)
             }
 
             BinaryOperator.GREATER_EQUAL -> {
-                checkNumberOperands(expression.operator, left, right)
+                checkNumberOperands(left, right)
                 (left as Double) >= (right as Double)
             }
         }
@@ -169,20 +170,17 @@ class Interpreter {
         return a == b
     }
 
-    private fun checkNumberOperand(unaryOperator: UnaryOperator, right: Any?) {
+    private fun checkNumberOperand(right: Any?) {
         if (right is Double) return
-        evaluationError = true
         throw RuntimeError("Operand must be a number.")
     }
 
-    private fun checkNumberOperands(unaryOperator: BinaryOperator, left: Any?, right: Any?) {
+    private fun checkNumberOperands(left: Any?, right: Any?) {
         if (left is Double && right is Double) return
-        evaluationError = true
         throw RuntimeError("Operands must be numbers.")
     }
 
     private fun plusOperatorError() {
-        evaluationError = true
         throw RuntimeError("Operands must be two numbers or two strings.")
     }
 }
