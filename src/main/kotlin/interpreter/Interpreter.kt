@@ -72,7 +72,14 @@ class Interpreter {
             is Expression.Literal -> evaluateLiteral(expression)
             is Expression.Unary -> evaluateUnaryExpression(expression)
             is Expression.Variable -> evaluateVariable(expression)
+            is Expression.Assigment -> evaluateAssigment(expression)
         }
+    }
+
+    private fun evaluateAssigment(expression: Expression.Assigment): Any? {
+        val res = evaluateExpression(expression.expression)
+        environment.assign(expression.name.lexeme, res)
+        return res
     }
 
     private fun evaluateVariable(variable: Expression.Variable): Any? {

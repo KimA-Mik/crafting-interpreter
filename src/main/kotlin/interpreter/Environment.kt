@@ -9,6 +9,15 @@ class Environment {
         values[key] = value
     }
 
+    fun assign(key: String, value: Any?) {
+        if (values.containsKey(key)) {
+            values[key] = value
+            return
+        }
+
+        throw Interpreter.RuntimeError("Undefined variable \"$key\".")
+    }
+
     fun get(name: Token): Any? {
         if (values.containsKey(name.lexeme)) {
             return values[name.lexeme]

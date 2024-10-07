@@ -38,4 +38,5 @@ sealed interface Expression {
     }
 
     data class Variable(val name: Token) : Expression
+    data class Assigment(val name: Token, val expression: Expression) : Expression
 }
