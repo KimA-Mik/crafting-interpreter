@@ -17,11 +17,11 @@ class Parser(private val tokens: List<Token>) {
         return null
     }
 
-    fun parseStatements(): List<Declaration> {
-        val statements = mutableListOf<Declaration>()
+    fun parseStatements(): List<Statement> {
+        val statements = mutableListOf<Statement>()
         try {
             while (!isEnd()) {
-                statements.add(declaration())
+                statements.add(statement())
             }
         } catch (e: ParserException) {
             handleParserException(e)
@@ -35,8 +35,8 @@ class Parser(private val tokens: List<Token>) {
     private fun handleParserException(e: ParserException) {
         val token = e.token
         when (token.type) {
-            TokenType.EOF -> System.err.println("[line ${token.line}] at end ${e.message}")
-            else -> System.err.println("[line ${token.line}] at '${token.lexeme}': ${e.message}")
+            TokenType.EOF -> System.err.println("[line ${token.line}] Error at end: ${e.message}")
+            else -> System.err.println("[line ${token.line}] Error at '${token.lexeme}': ${e.message}")
         }
     }
 
@@ -186,13 +186,27 @@ class Parser(private val tokens: List<Token>) {
         throw error(peek(), "Expect expression.")
     }
 
-    private fun declaration(): Declaration {
-        if (match(TokenType.VAR)) return variableDeclaration()
-
-        return statement()
+    private fun statement(): Statement {
+        return when {
+            match(TokenType.PRINT) -> printStatement()
+            match(TokenType.LEFT_BRACE) -> block()
+            match(TokenType.VAR) -> variableDeclaration()
+            else -> expressionStatement()
+        }
     }
 
-    private fun variableDeclaration(): Declaration.Variable {
+    private fun block(): Statement.Block {
+        val statements = mutableListOf<Statement>()
+        while (!check(TokenType.RIGHT_BRACE) && !isEnd()) {
+            statements.add(statement())
+        }
+
+        consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
+        return Statement.Block(statements)
+    }
+
+
+    private fun variableDeclaration(): Statement.Declaration.Variable {
         val name = consume(TokenType.IDENTIFIER, "Expect variable name.")
 
         var initializer: Expression? = null
@@ -201,24 +215,18 @@ class Parser(private val tokens: List<Token>) {
         }
 
         consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
-        return Declaration.Variable(name, initializer)
+        return Statement.Declaration.Variable(name, initializer)
     }
 
-    private fun statement(): Declaration.Statement {
-        if (match(TokenType.PRINT)) return printStatement()
-
-        return expressionStatement()
-    }
-
-    private fun printStatement(): Declaration.Statement.Print {
+    private fun printStatement(): Statement.Print {
         val value = expression()
         consume(TokenType.SEMICOLON, "Expect ';' after value.")
-        return Declaration.Statement.Print(value)
+        return Statement.Print(value)
     }
 
-    private fun expressionStatement(): Declaration.Statement.Expr {
+    private fun expressionStatement(): Statement.Expr {
         val expression = expression()
         consume(TokenType.SEMICOLON, "Expect ';' after expression.")
-        return Declaration.Statement.Expr(expression)
+        return Statement.Expr(expression)
     }
 }

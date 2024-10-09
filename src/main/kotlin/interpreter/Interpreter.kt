@@ -1,12 +1,12 @@
 package interpreter
 
 import parser.BinaryOperator
-import parser.Declaration
 import parser.Expression
+import parser.Statement
 import parser.UnaryOperator
 
 class Interpreter {
-    private val environment = Environment()
+    private var environment = Environment()
     var evaluationError = false
         private set
 
@@ -22,10 +22,10 @@ class Interpreter {
         return null
     }
 
-    fun execute(declarations: List<Declaration>) {
+    fun execute(statements: List<Statement>) {
         try {
-            for (declaration in declarations) {
-                executeDeclaration(declaration)
+            for (statement in statements) {
+                executeStatement(statement)
             }
         } catch (e: RuntimeError) {
             System.err.println(e.message)
@@ -33,21 +33,35 @@ class Interpreter {
         }
     }
 
-    private fun executeDeclaration(declaration: Declaration) {
-        when (declaration) {
-            is Declaration.Statement -> executeStatement(declaration)
-            is Declaration.Variable -> executeVariable(declaration)
-        }
-    }
-
-    private fun executeStatement(statement: Declaration.Statement) {
+    private fun executeStatement(statement: Statement) {
         when (statement) {
-            is Declaration.Statement.Expr -> executeExprStatement(statement)
-            is Declaration.Statement.Print -> executePrintStatement(statement)
+            is Statement.Block -> executeBlock(statement)
+            is Statement.Declaration -> executeDeclaration(statement)
+            is Statement.Expr -> executeExprStatement(statement)
+            is Statement.Print -> executePrintStatement(statement)
         }
     }
 
-    private fun executeVariable(variable: Declaration.Variable) {
+    private fun executeBlock(block: Statement.Block) {
+        environment = Environment(environment)
+        try {
+            for (statement in block.statements) {
+                executeStatement(statement)
+            }
+        } finally {
+            environment.enclosing?.let {
+                environment = it
+            }
+        }
+    }
+
+    private fun executeDeclaration(declaration: Statement.Declaration) {
+        when (declaration) {
+            is Statement.Declaration.Variable -> executeVariable(declaration)
+        }
+    }
+
+    private fun executeVariable(variable: Statement.Declaration.Variable) {
         var value: Any? = null
         variable.initializer?.let {
             value = evaluateExpression(it)
@@ -56,11 +70,11 @@ class Interpreter {
         environment.define(variable.name.lexeme, value)
     }
 
-    private fun executeExprStatement(statement: Declaration.Statement.Expr) {
+    private fun executeExprStatement(statement: Statement.Expr) {
         evaluateExpression(statement.expression)
     }
 
-    private fun executePrintStatement(statement: Declaration.Statement.Print) {
+    private fun executePrintStatement(statement: Statement.Print) {
         val res = evaluateExpression(statement.expression)
         println(res.stringify())
     }
