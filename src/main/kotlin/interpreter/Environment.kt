@@ -17,7 +17,10 @@ class Environment(
             return
         }
 
-        enclosing?.assign(key, value)
+        enclosing?.let {
+            it.assign(key, value)
+            return
+        }
 
         throw Interpreter.RuntimeError("Undefined variable \"$key\".")
     }
