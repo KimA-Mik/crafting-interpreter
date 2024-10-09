@@ -35,23 +35,22 @@ class Interpreter {
 
     private fun executeStatement(statement: Statement) {
         when (statement) {
-            is Statement.Block -> executeBlock(statement)
+            is Statement.Block -> executeBlock(statement, Environment(environment))
             is Statement.Declaration -> executeDeclaration(statement)
             is Statement.Expr -> executeExprStatement(statement)
             is Statement.Print -> executePrintStatement(statement)
         }
     }
 
-    private fun executeBlock(block: Statement.Block) {
-        environment = Environment(environment)
+    private fun executeBlock(block: Statement.Block, blockEnvironment: Environment) {
+        val previousEnvironment = environment
+        environment = blockEnvironment
         try {
             for (statement in block.statements) {
                 executeStatement(statement)
             }
         } finally {
-            environment.enclosing?.let {
-                environment = it
-            }
+            environment = previousEnvironment
         }
     }
 
